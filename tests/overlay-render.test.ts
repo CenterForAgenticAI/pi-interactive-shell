@@ -6,6 +6,10 @@ const config: InteractiveShellConfig = {
 	overlayWidthPercent: 95,
 	overlayHeightPercent: 60,
 	focusShortcut: "alt+shift+f",
+	backgroundShortcut: "ctrl+b",
+	transferShortcut: "ctrl+t",
+	menuShortcut: "ctrl+q",
+	returnToAgentShortcut: "ctrl+g",
 	spawn: {
 		defaultAgent: "pi",
 		shortcut: "alt+shift+p",
