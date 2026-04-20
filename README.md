@@ -399,6 +399,10 @@ Shortcut settings are pinned at startup. If you change `focusShortcut` or `spawn
   "overlayWidthPercent": 95,
   "overlayHeightPercent": 60,
   "focusShortcut": "alt+shift+f",
+  "backgroundShortcut": "ctrl+b",
+  "transferShortcut": "ctrl+t",
+  "menuShortcut": "ctrl+q",
+  "returnToAgentShortcut": "ctrl+g",
   "spawn": {
     "defaultAgent": "pi",
     "shortcut": "alt+shift+p",
@@ -441,6 +445,10 @@ Shortcut settings are pinned at startup. If you change `focusShortcut` or `spawn
 | `overlayWidthPercent` | 95 | Overlay width (10-100%) |
 | `overlayHeightPercent` | 60 | Overlay height (20-90%) |
 | `focusShortcut` | "alt+shift+f" | Toggle focus between overlay and main chat |
+| `backgroundShortcut` | "ctrl+b" | Shortcut to dismiss overlay and keep process running |
+| `transferShortcut` | "ctrl+t" | Shortcut to capture output and transfer to main agent |
+| `menuShortcut` | "ctrl+q" | Shortcut to open the detach dialog |
+| `returnToAgentShortcut` | "ctrl+g" | Shortcut to return control to the agent after user takeover (hands-free/dispatch) |
 | `spawn.defaultAgent` | "pi" | Configured default spawn agent for `/spawn`, the spawn shortcut, and agent-side structured spawn |
 | `spawn.shortcut` | "alt+shift+p" | Keyboard shortcut that launches the configured default spawn agent |
 | `spawn.commands.<agent>` | `pi` / `codex` / `claude` | Executable or path override per spawn agent |
@@ -465,6 +473,8 @@ Shortcut settings are pinned at startup. If you change `focusShortcut` or `spawn
 | `handoffPreviewMaxChars` | 2000 | Max chars in tail preview (0-50KB) |
 | `handoffSnapshotEnabled` | false | Write transcript on detach/exit |
 | `ansiReemit` | true | Preserve ANSI colors in output |
+
+**Avoiding keybinding collisions (tmux etc.):** if you run pi inside tmux with the default prefix `Ctrl+B`, the overlay's `Ctrl+B` "background" shortcut will be swallowed by tmux before it reaches pi. Rebind `backgroundShortcut` (and any other colliding binding) in `~/.pi/agent/interactive-shell.json` or `.pi/interactive-shell.json`, e.g. `"backgroundShortcut": "alt+b"`. The same applies to the other overlay bindings (`transferShortcut`, `menuShortcut`, `returnToAgentShortcut`) if they collide with your terminal multiplexer or shell.
 
 ## How It Works
 
