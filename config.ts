@@ -18,6 +18,10 @@ export interface InteractiveShellConfig {
 	overlayWidthPercent: number;
 	overlayHeightPercent: number;
 	focusShortcut: string;
+	backgroundShortcut: string;
+	transferShortcut: string;
+	menuShortcut: string;
+	returnToAgentShortcut: string;
 	spawn: SpawnConfig;
 	scrollbackLines: number;
 	ansiReemit: boolean;
@@ -62,6 +66,10 @@ const DEFAULT_CONFIG: InteractiveShellConfig = {
 	overlayWidthPercent: 95,
 	overlayHeightPercent: 60,
 	focusShortcut: "alt+shift+f",
+	backgroundShortcut: "ctrl+b",
+	transferShortcut: "ctrl+t",
+	menuShortcut: "ctrl+q",
+	returnToAgentShortcut: "ctrl+g",
 	spawn: DEFAULT_SPAWN_CONFIG,
 	scrollbackLines: 5000,
 	ansiReemit: true,
@@ -116,6 +124,10 @@ export function loadConfig(cwd: string): InteractiveShellConfig {
 		overlayWidthPercent: clampPercent(merged.overlayWidthPercent, DEFAULT_CONFIG.overlayWidthPercent),
 		overlayHeightPercent: clampInt(merged.overlayHeightPercent, DEFAULT_CONFIG.overlayHeightPercent, 20, 90),
 		focusShortcut: resolveShortcut(merged.focusShortcut, DEFAULT_CONFIG.focusShortcut),
+		backgroundShortcut: resolveShortcut(merged.backgroundShortcut, DEFAULT_CONFIG.backgroundShortcut),
+		transferShortcut: resolveShortcut(merged.transferShortcut, DEFAULT_CONFIG.transferShortcut),
+		menuShortcut: resolveShortcut(merged.menuShortcut, DEFAULT_CONFIG.menuShortcut),
+		returnToAgentShortcut: resolveShortcut(merged.returnToAgentShortcut, DEFAULT_CONFIG.returnToAgentShortcut),
 		spawn: mergedSpawn,
 		scrollbackLines: clampInt(merged.scrollbackLines, DEFAULT_CONFIG.scrollbackLines, 200, 50000),
 		ansiReemit: merged.ansiReemit !== false,
