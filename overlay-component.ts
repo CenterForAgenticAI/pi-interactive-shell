@@ -19,6 +19,14 @@ import {
 import { captureCompletionOutput, captureTransferOutput, maybeBuildHandoffPreview, maybeWriteHandoffSnapshot } from "./handoff-utils.js";
 import { createSessionQueryState, getSessionOutput } from "./session-query.js";
 
+/** Format a key binding string for display, capitalizing each '+'-separated segment. */
+function formatKey(k: string): string {
+	return k
+		.split("+")
+		.map((seg) => (seg.length === 0 ? seg : seg[0].toUpperCase() + seg.slice(1)))
+		.join("+");
+}
+
 export class InteractiveShellOverlay implements Component, Focusable {
 	focused = false;
 
@@ -820,14 +828,14 @@ export class InteractiveShellOverlay implements Component, Focusable {
 			return;
 		}
 
-		// Ctrl+G: Return to agent monitoring (only active during takeover)
-		if (this.userTookOver && this.state === "running" && matchesKey(data, "ctrl+g")) {
+		// Return-to-agent: Return to agent monitoring (only active during takeover)
+		if (this.userTookOver && this.state === "running" && matchesKey(data, this.config.returnToAgentShortcut)) {
 			this.returnToHandsFree();
 			return;
 		}
 
-		// Ctrl+T: Quick transfer - capture output and close (works in all states including "exited")
-		if (matchesKey(data, "ctrl+t")) {
+		// Transfer: Quick transfer - capture output and close (works in all states including "exited")
+		if (matchesKey(data, this.config.transferShortcut)) {
 			// If in hands-free mode, trigger takeover first (notifies agent)
 			if (this.state === "hands-free") {
 				this.triggerUserTakeover();
@@ -836,8 +844,8 @@ export class InteractiveShellOverlay implements Component, Focusable {
 			return;
 		}
 
-		// Ctrl+B: Quick background - dismiss overlay, keep process running
-		if (matchesKey(data, "ctrl+b") && !this.session.exited) {
+		// Background: Quick background - dismiss overlay, keep process running
+		if (matchesKey(data, this.config.backgroundShortcut) && !this.session.exited) {
 			if (this.state === "hands-free") {
 				this.triggerUserTakeover();
 			}
@@ -852,8 +860,8 @@ export class InteractiveShellOverlay implements Component, Focusable {
 			return;
 		}
 
-		// Ctrl+Q opens detach dialog (works in both hands-free and running)
-		if (matchesKey(data, "ctrl+q")) {
+		// Menu: open detach dialog (works in both hands-free and running)
+		if (matchesKey(data, this.config.menuShortcut)) {
 			// If in hands-free mode, trigger takeover first (notifies agent)
 			if (this.state === "hands-free") {
 				this.triggerUserTakeover();
@@ -977,13 +985,15 @@ export class InteractiveShellOverlay implements Component, Focusable {
 			const elapsed = formatDuration(Date.now() - this.startTime);
 			hint = `🤖 Hands-free (${elapsed}) • Type anything to take over`;
 		} else if (this.userTookOver) {
+			const returnKey = formatKey(this.config.returnToAgentShortcut);
 			hint = sanitizedReason
-				? `You took over • Ctrl+G return to agent • ${sanitizedReason}`
-				: "You took over • Ctrl+G return to agent";
+				? `You took over • ${returnKey} return to agent • ${sanitizedReason}`
+				: `You took over • ${returnKey} return to agent`;
 		} else {
+			const bgKey = formatKey(this.config.backgroundShortcut);
 			hint = sanitizedReason
-				? `Ctrl+B background • ${sanitizedReason}`
-				: "Ctrl+B background";
+				? `${bgKey} background • ${sanitizedReason}`
+				: `${bgKey} background`;
 		}
 		lines.push(row(dim(truncateToWidth(hint, innerWidth, "..."))));
 		lines.push(border(borderGlyphs.separatorLeft + borderGlyphs.horizontal.repeat(width - 2) + borderGlyphs.separatorRight));
@@ -1027,6 +1037,10 @@ export class InteractiveShellOverlay implements Component, Focusable {
 
 		const footerLines: string[] = [];
 		const focusHint = `${formatShortcut(this.config.focusShortcut)} ${this.focused ? "unfocus" : "focus shell"}`;
+		const bgKey = formatKey(this.config.backgroundShortcut);
+		const transferKey = formatKey(this.config.transferShortcut);
+		const menuKey = formatKey(this.config.menuShortcut);
+		const returnKey = formatKey(this.config.returnToAgentShortcut);
 
 		if (this.state === "detach-dialog") {
 			footerLines.push(row(accent("Session actions:")));
@@ -1044,16 +1058,16 @@ export class InteractiveShellOverlay implements Component, Focusable {
 			footerLines.push(row(dim(`Closing in ${this.exitCountdown}s... (any key to close) • ${focusHint}`)));
 		} else if (this.state === "hands-free") {
 			if (this.focused) {
-				footerLines.push(row(dim(`🤖 Agent controlling • Type to take over • Ctrl+T transfer • Ctrl+B background • ${focusHint}`)));
+				footerLines.push(row(dim(`🤖 Agent controlling • Type to take over • ${transferKey} transfer • ${bgKey} background • ${focusHint}`)));
 			} else {
 				footerLines.push(row(dim(`🤖 Agent controlling • ${focusHint}`)));
 			}
 		} else if (!this.focused) {
 			footerLines.push(row(dim(focusHint)));
 		} else if (this.userTookOver) {
-			footerLines.push(row(dim(`Ctrl+G agent • Ctrl+T transfer • Ctrl+B background • Ctrl+Q menu • ${focusHint}`)));
+			footerLines.push(row(dim(`${returnKey} agent • ${transferKey} transfer • ${bgKey} background • ${menuKey} menu • ${focusHint}`)));
 		} else {
-			footerLines.push(row(dim(`Ctrl+T transfer • Ctrl+B background • Ctrl+Q menu • Shift+Up/Down scroll • ${focusHint}`)));
+			footerLines.push(row(dim(`${transferKey} transfer • ${bgKey} background • ${menuKey} menu • Shift+Up/Down scroll • ${focusHint}`)));
 		}
 
 		while (footerLines.length < footerHeight) {
