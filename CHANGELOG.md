@@ -4,15 +4,23 @@ All notable changes to the `pi-interactive-shell` extension will be documented i
 
 ## [Unreleased]
 
+## [0.18.0] - 2026-10-27
+
+### Highlights
+- The tool costs about 3,500 fewer tokens on every model request, because its definition is a quarter of its old size. Every option still works.
+- xAI and llama.cpp servers now accept requests that include the tool.
+- When a background session finishes, its full output is saved to a file, so the agent can read more than the last few lines.
+- Mistyped key names now return a clear error instead of being typed into the terminal.
+
 ### Changed
-- The bundled skill is now named `interactive-shell`, the name the tool's own description tells agents to load. It is about a fifth of its old size and leads with the calls agents make most: headless test runs, CI and PR gate monitors, and session cleanup. Details for hands-free supervision, agent launching, selected output, and Jev live in reference files that load only when needed.
+- The `interactive_shell` tool definition, which is sent with every model request, is about a quarter of its old size: 4,682 characters (about 1,170 tokens) instead of 18,644 (about 4,660). It lists only the fields agents use day to day. Advanced fields such as Jev supervision, saved output sources, and monitor history still work, and every call is still checked against the complete schema. To send the complete definition instead, set `"toolSchema": "full"` in the config.
+- When a background session finishes, its full terminal output is saved to a log file and the completion message gives the path, so the agent can read past the 5-line preview. A later query for the finished session points to the same file instead of only saying it was not found.
+- A background session that will close itself after its output goes quiet now says so when it starts, and explains how to turn that off for tests and CI watches. The message sent when it closes gives the same advice.
 - Unknown `inputKeys` names and malformed `inputHex` bytes now return an error that suggests valid keys. Before, an unknown key name was typed into the terminal as text, and a bad hex byte was silently dropped.
-- When a headless dispatch or monitor finishes, its full terminal output is saved to a log file and the completion message gives the path, so the agent can read past the 5-line tail. A later query for the finished session points to the same file instead of only saying it was not found.
-- A dispatch launch that will auto-close after quiet output now says so in its reply, with how to turn that off for tests and CI watches. The auto-close completion message carries the same advice.
-- The `interactive_shell` tool definition, which is sent with every model request, is about a quarter of its old size: 4,682 characters (about 1,170 tokens) instead of 18,644 (about 4,660). It now lists only the fields agents use day to day. Advanced fields such as Jev supervision, saved output sources, and monitor history still work as before, and every call is still checked against the complete schema. Set `"toolSchema": "full"` in the config to send the complete definition.
+- The bundled skill is renamed to `interactive-shell`, the name the tool's own description tells agents to load. It is about a fifth of its old size and starts with the most common tasks: running tests in the background, watching CI and PR checks, and cleaning up sessions. Details for less common features are in separate files that load only when needed.
 
 ### Fixed
-- xAI's Responses API and llama.cpp servers no longer reject requests that include the `interactive_shell` tool. The tool definition no longer sends regex patterns those providers cannot read, and the extension still rejects the same invalid semantic action and watch values when the tool runs. Thanks to [@ianbmacdonald](https://github.com/ianbmacdonald) for [#89](https://github.com/nicobailon/pi-interactive-shell/issues/89) and [@jeffreysmattson](https://github.com/jeffreysmattson) for [#87](https://github.com/nicobailon/pi-interactive-shell/issues/87).
+- xAI's Responses API and llama.cpp servers no longer reject requests that include the `interactive_shell` tool. The tool definition no longer includes regex patterns those providers cannot parse, and invalid semantic action and watch values are now rejected when the tool runs. Thanks to [@ianbmacdonald](https://github.com/ianbmacdonald) for [#89](https://github.com/nicobailon/pi-interactive-shell/issues/89) and [@jeffreysmattson](https://github.com/jeffreysmattson) for [#87](https://github.com/nicobailon/pi-interactive-shell/issues/87).
 
 ## [0.17.1] - 2026-10-13
 
